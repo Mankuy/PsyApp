@@ -7,7 +7,10 @@ COPY . .
 
 RUN pnpm install || (echo "=== pnpm install failed ===" && exit 1)
 
-# Generar Prisma Client ANTES de buildar (NestJS lo necesita)
+# Build core first (api depends on it)
+RUN cd packages/core && pnpm build || (echo "=== core build failed ===" && exit 1)
+
+# Generate Prisma Client
 RUN cd packages/api && pnpm prisma generate || (echo "=== prisma generate failed ===" && exit 1)
 
 RUN cd packages/web && npx vite build || (echo "=== web build failed ===" && exit 1)
