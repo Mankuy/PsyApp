@@ -22,10 +22,10 @@ COPY . .
 
 # Build frontend and backend
 RUN cd packages/web && npx vite build
-RUN pnpm --filter @psyapp/api build
+RUN pnpm --filter api build
 
 # Prisma generate (if needed)
-RUN pnpm --filter @psyapp/api prisma generate 2>/dev/null || true
+RUN pnpm --filter api prisma generate 2>/dev/null || true
 
 EXPOSE 3000
 
