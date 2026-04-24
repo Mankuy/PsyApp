@@ -21,7 +21,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build frontend and backend
-RUN pnpm --filter @psyapp/web build
+RUN cd packages/web && npx vite build
 RUN pnpm --filter @psyapp/api build
 
 # Prisma generate (if needed)
