@@ -1,0 +1,43 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+interface LangState {
+  lang: 'es' | 'en'
+  setLang: (value: 'es' | 'en') => void
+  toggleLang: () => void
+}
+
+export const useLangStore = create<LangState>()(
+  persist(
+    (set) => ({
+      lang: 'es',
+      setLang: (value) => set({ lang: value }),
+      toggleLang: () => set((state) => ({ lang: state.lang === 'es' ? 'en' : 'es' })),
+    }),
+    {
+      name: 'lang-storage',
+      getStorage: () =>
+        typeof window !== 'undefined'
+          ? {
+              getItem: (name) => {
+                try {
+                  return window.localStorage.getItem(name)
+                } catch {
+                  return null
+                }
+              },
+              setItem: (name, value) => {
+                try {
+                  window.localStorage.setItem(name, value)
+                } catch {}
+              },
+              removeItem: (name) => {
+                try {
+                  window.localStorage.removeItem(name)
+                } catch {}
+              },
+            }
+          : undefined,
+    }
+  )
+)

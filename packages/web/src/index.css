@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* FullCalendar dark mode fixes */
+.dark .fc {
+  --fc-page-bg-color: #111827;
+  --fc-border-color: #374151;
+  --fc-neutral-bg-color: #1f2937;
+  --fc-list-event-hover-bg-color: #374151;
+}
+.dark .fc-theme-standard th,
+.dark .fc-theme-standard .fc-scrollgrid-sync-inner {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+.dark .fc-theme-standard td {
+  border-color: #374151 !important;
+}
+.dark .fc-daygrid-day,
+.dark .fc-timegrid-col,
+.dark .fc-timegrid-col-frame {
+  background-color: #111827 !important;
+}
+.dark .fc-daygrid-day-number,
+.dark .fc-timegrid-slot-label-cushion,
+.dark .fc-col-header-cell-cushion {
+  color: #e5e7eb !important;
+}
+.dark .fc-toolbar-title {
+  color: #f3f4f6 !important;
+}
+.dark .fc-button-primary {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+}
+.dark .fc-button-primary:hover {
+  background-color: #4338ca !important;
+  border-color: #4338ca !important;
+}
+.dark .fc-event {
+  border: none !important;
+}
+.dark .fc-timegrid-axis-cushion {
+  color: #9ca3af !important;
+}
+.dark .fc-timegrid-now-indicator-line {
+  border-color: #ef4444 !important;
+}
+.dark .fc-list-empty {
+  background-color: #111827 !important;
+  color: #9ca3af !important;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Hover micro-interactions */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(0,0,0,0.15);
+}
+.hover-scale {
+  transition: transform 0.15s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Focus rings */
+.focus-ring:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-offset: 2px;
+  ring-color: #4f46e5;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+/* Toast notification */
+.toast-enter {
+  animation: slideIn 0.3s ease-out forwards;
+}
+.toast-exit {
+  animation: fadeIn 0.2s ease-in reverse forwards;
+}

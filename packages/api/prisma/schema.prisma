@@ -1,0 +1,225 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  plan          String   @default("FREE")
+  ownerId       String   @unique
+  owner         Psychologist @relation("organizationOwner", fields: [ownerId], references: [id])
+  members       OrganizationMember[]
+  patients      Patient[] @relation("organizationPatients")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model OrganizationMember {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  psychologistId  String
+  psychologist    Psychologist @relation("organizationMemberships", fields: [psychologistId], references: [id], onDelete: Cascade)
+  role            String   @default("PROFESSIONAL")
+  joinedAt        DateTime @default(now())
+  @@unique([organizationId, psychologistId])
+  @@index([organizationId])
+  @@index([psychologistId])
+}
+
+model Psychologist {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  role          String   @default("PSYCHOLOGIST")
+  stripeCustomerId String?
+  plan          String   @default("FREE")
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  patients      Patient[] @relation("psychologistPatients")
+  appointments  Appointment[] @relation("psychologistAppointments")
+  payments      Payment[] @relation("psychologistPayments")
+  notes         Note[] @relation("psychologistNotes")
+  documents     Document[] @relation("psychologistDocuments")
+  availabilityRules AvailabilityRule[]
+  notificationLogs NotificationLog[]
+  subscriptions Subscription[]
+  ownedOrganization Organization? @relation("organizationOwner")
+  memberships   OrganizationMember[] @relation("organizationMemberships")
+}
+
+model Patient {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  psychologistId String
+  psychologist  Psychologist @relation("psychologistPatients", fields: [psychologistId], references: [id])
+  organizationId String?
+  organization  Organization? @relation("organizationPatients", fields: [organizationId], references: [id])
+  phone         String?
+  dateOfBirth   DateTime?
+  gender        String?
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  appointments  Appointment[] @relation("patientAppointments")
+  payments      Payment[] @relation("patientPayments")
+  notes         Note[] @relation("patientNotes")
+  documents     Document[] @relation("patientDocuments")
+  @@index([psychologistId])
+  @@index([organizationId])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  INDIVIDUAL
+  COUPLE
+  FAMILY
+  GROUP
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation("psychologistAppointments", fields: [psychologistId], references: [id])
+  patientId     String
+  patient       Patient @relation("patientAppointments", fields: [patientId], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  type          AppointmentType @default(INDIVIDUAL)
+  status        AppointmentStatus @default(SCHEDULED)
+  title         String?
+  notes         String?
+  videoLink     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  payment       Payment? @relation("appointmentPayment")
+  noteRecords   Note[] @relation("appointmentNotes")
+  @@index([psychologistId])
+  @@index([patientId])
+  @@index([startTime, endTime])
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  SESSION
+  SUBSCRIPTION
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation("psychologistPayments", fields: [psychologistId], references: [id])
+  patientId     String?
+  patient       Patient? @relation("patientPayments", fields: [patientId], references: [id])
+  appointmentId String? @unique
+  appointment   Appointment? @relation("appointmentPayment", fields: [appointmentId], references: [id])
+  amount        Int
+  currency      String @default("UYU")
+  type          PaymentType
+  status        PaymentStatus
+  stripePaymentId String?
+  stripeInvoiceId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([psychologistId])
+  @@index([patientId])
+  @@index([appointmentId])
+  @@index([status])
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation(fields: [psychologistId], references: [id])
+  stripeSubscriptionId String @unique
+  stripeCustomerId String
+  status        String
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([psychologistId])
+}
+
+model Note {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation("psychologistNotes", fields: [psychologistId], references: [id])
+  patientId     String
+  patient       Patient @relation("patientNotes", fields: [patientId], references: [id])
+  appointmentId String?
+  appointment   Appointment? @relation("appointmentNotes", fields: [appointmentId], references: [id])
+  content       String?
+  summary       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([psychologistId])
+  @@index([patientId])
+  @@index([appointmentId])
+}
+
+model Document {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation("psychologistDocuments", fields: [psychologistId], references: [id])
+  patientId     String?
+  patient       Patient? @relation("patientDocuments", fields: [patientId], references: [id])
+  title         String
+  filePath      String
+  fileType      String   @default("pdf")
+  signedAt      DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([psychologistId])
+  @@index([patientId])
+}
+
+model AvailabilityRule {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation(fields: [psychologistId], references: [id])
+  dayOfWeek     Int
+  startTime     String
+  endTime       String
+  slotDuration  Int @default(30)
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([psychologistId, dayOfWeek])
+}
+
+model NotificationLog {
+  id            String   @id @default(cuid())
+  psychologistId String
+  psychologist  Psychologist @relation(fields: [psychologistId], references: [id])
+  recipientType String
+  recipient     String
+  template      String
+  subject       String?
+  body          String
+  status        String
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+  @@index([psychologistId])
+}

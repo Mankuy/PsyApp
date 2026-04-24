@@ -1,0 +1,34 @@
+const CACHE_NAME = 'psyapp-v1'
+const urlsToCache = ['/']
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+  )
+})
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      if (response) return response
+      return fetch(event.request)
+    })
+  )
+})
+
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {}
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'PsyApp', {
+      body: data.body || 'Tienes una notificación',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      data: data.data || {},
+    })
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  event.waitUntil(self.clients.openWindow('/'))
+})

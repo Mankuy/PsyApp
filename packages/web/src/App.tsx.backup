@@ -1,0 +1,80 @@
+import { useEffect } from 'react'
+import { Routes, Route, NavLink } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  CreditCard,
+  BarChart3,
+  Settings,
+} from 'lucide-react'
+import { useThemeStore } from './stores/themeStore'
+import { useLangStore } from './stores/langStore'
+import { applyTheme } from './utils/theme'
+import Dashboard from './pages/Dashboard'
+import Appointments from './pages/Appointments'
+import Patients from './pages/Patients'
+import Billing from './pages/Billing'
+import Reports from './pages/Reports'
+import SettingsPage from './pages/Settings'
+
+function Sidebar() {
+  const { lang } = useLangStore()
+
+  const linkClass =
+    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors'
+  const inactive = 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400'
+  const active = 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+
+  const items = [
+    { to: '/', label: lang === 'es' ? 'Panel' : 'Dashboard', icon: LayoutDashboard },
+    { to: '/appointments', label: lang === 'es' ? 'Citas' : 'Appointments', icon: CalendarDays },
+    { to: '/patients', label: lang === 'es' ? 'Pacientes' : 'Patients', icon: Users },
+    { to: '/billing', label: lang === 'es' ? 'Facturación' : 'Billing', icon: CreditCard },
+    { to: '/reports', label: lang === 'es' ? 'Informes' : 'Reports', icon: BarChart3 },
+    { to: '/settings', label: lang === 'es' ? 'Configuración' : 'Settings', icon: Settings },
+  ]
+
+  return (
+    <aside className="w-60 bg-white border-r border-gray-200 flex flex-col p-4 gap-1 dark:bg-gray-900 dark:border-gray-700">
+      <div className="text-2xl font-bold text-indigo-600 mb-6 px-2">PsyApp</div>
+      {items.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.to === '/'}
+          className={({ isActive }) =>
+            `${linkClass} ${isActive ? active : inactive}`
+          }
+        >
+          <item.icon size={18} />
+          {item.label}
+        </NavLink>
+      ))}
+    </aside>
+  )
+}
+
+export default function App() {
+  const { isDark } = useThemeStore()
+
+  useEffect(() => {
+    applyTheme(isDark)
+  }, [isDark])
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+      <Sidebar />
+      <main className="flex-1 p-8 overflow-y-auto">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/appointments" element={<Appointments />} />
+          <Route path="/patients" element={<Patients />} />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}
