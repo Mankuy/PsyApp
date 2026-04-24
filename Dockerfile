@@ -21,4 +21,4 @@ RUN test -f packages/api/dist/main.js || (echo "=== dist/main.js not found ===" 
 
 EXPOSE 3000
 
-CMD ["node", "packages/api/dist/main.js"]
+CMD ["sh", "packages/api/start.sh"]
