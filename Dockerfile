@@ -4,8 +4,10 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json* pnpm-lock.yaml* ./
+# Copy workspace config and root package.json
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+
+# Copy all package.json files first (for layer caching)
 COPY packages/api/package.json ./packages/api/
 COPY packages/web/package.json ./packages/web/
 COPY packages/core/package.json ./packages/core/
@@ -14,18 +16,20 @@ COPY packages/scheduling/package.json ./packages/scheduling/
 COPY packages/payments/package.json ./packages/payments/
 COPY packages/notifications/package.json ./packages/notifications/
 
-# Install deps
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source
+# Copy source code
 COPY . .
 
-# Build frontend and backend
+# Build frontend
 RUN cd packages/web && npx vite build
-RUN pnpm --filter api build
 
-# Prisma generate (if needed)
-RUN pnpm --filter api prisma generate 2>/dev/null || true
+# Build backend
+RUN cd packages/api && pnpm build
+
+# Generate Prisma client
+RUN cd packages/api && pnpm prisma generate 2>/dev/null || true
 
 EXPOSE 3000
 

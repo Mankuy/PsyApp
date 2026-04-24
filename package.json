@@ -1,0 +1,10 @@
+{
+  "name": "psyapp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:web": "cd packages/web && npx vite build",
+    "build:api": "cd packages/api && pnpm build",
+    "start": "node packages/api/dist/main.js"
+  }
+}
